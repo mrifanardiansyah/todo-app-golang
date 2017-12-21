@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -33,6 +34,7 @@ func (a *App) Initialize(user, password, dbName string) {
 
 func (a *App) InitializeRoute() {
 	a.Router.HandleFunc("/todo", a.getTodoList).Methods("GET")
+	a.Router.HandleFunc("/todo/{id:[0-9]+}", a.GetTodoListById).Methods("GET")
 	a.Router.HandleFunc("/todo/{id:[0-9]+}", a.updateTodoList).Methods("PUT")
 	a.Router.HandleFunc("/todo", a.addTodoList).Methods("POST")
 	a.Router.HandleFunc("/todo/{id:[0-9]+}", a.deleteTodoList).Methods("DELETE")
@@ -59,6 +61,25 @@ func (a *App) getTodoList(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, todoListPage)
 
 	// responseWithJson(w, http.StatusOK, List)
+}
+
+func (a *App) GetTodoListById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+
+	if err != nil {
+		responseWithError(w, http.StatusBadRequest, "Invalid Id TodoListItem")
+	}
+
+	var item ListItem
+	item.ID = id
+	err = item.GetList(a.DB)
+
+	if err != nil {
+		responseWithError(w, http.StatusInternalServerError, err.Error())
+	}
+
+	responseWithJson(w, http.StatusOK, item)
 }
 
 func (a *App) updateTodoList(w http.ResponseWriter, r *http.Request) {

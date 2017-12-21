@@ -19,6 +19,11 @@ type ListItem struct {
 	Done        bool
 }
 
+func (li *ListItem) GetList(db *sql.DB) error {
+	statement := fmt.Sprintf("SELECT id, title, description, done FROM todolist where id=%d;", li.ID)
+	return db.QueryRow(statement).Scan(&li.ID, &li.Title, &li.Description, &li.Done)
+}
+
 func (li *ListItem) AddList(db *sql.DB) error {
 	return errors.New("error. belum ditambah")
 }
