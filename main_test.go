@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -39,7 +41,7 @@ func TestEmptyTable(t *testing.T) {
 func TestGetAllTodoList(t *testing.T) {
 	clearTable()
 
-	addUser(5)
+	addListItem(5)
 
 	req, _ := http.NewRequest("GET", "/todo", nil)
 	response := executeRequest(req)
@@ -50,11 +52,85 @@ func TestGetAllTodoList(t *testing.T) {
 func TestGetTodoListById(t *testing.T) {
 	clearTable()
 
-	addUser(1)
+	addListItem(1)
 
 	req, _ := http.NewRequest("GET", "/todo/1", nil)
 	response := executeRequest(req)
 
+	checkResponseCode(t, http.StatusOK, response.Code)
+}
+
+func TestAddTodoList(t *testing.T) {
+	clearTable()
+
+	todoListItem := []byte(`{"title": "blabla", "description": "bla bla bla", "done" : false}`)
+
+	req, _ := http.NewRequest("POST", "/todo", bytes.NewBuffer(todoListItem))
+	response := executeRequest(req)
+
+	checkResponseCode(t, http.StatusOK, response.Code)
+}
+
+func TestAddEmptyTodoList(t *testing.T) {
+	clearTable()
+
+	todoListItem := []byte(`{"title": "", "description": "", "done" : }`)
+
+	req, _ := http.NewRequest("POST", "/todo", bytes.NewBuffer(todoListItem))
+	response := executeRequest(req)
+
+	checkResponseCode(t, http.StatusBadRequest, response.Code)
+}
+
+func TestUpdateTodoList(t *testing.T) {
+	clearTable()
+
+	addListItem(1)
+
+	req, _ := http.NewRequest("GET", "/todo/1", nil)
+	response := executeRequest(req)
+
+	var originalUser map[string]interface{}
+
+	json.Unmarshal(response.Body.Bytes(), &originalUser)
+
+	fmt.Println(originalUser["id"])
+
+	updateUser := []byte(`{"title":"update", "description": "wkwk", "done": true}`)
+
+	req, _ = http.NewRequest("PUT", "/todo/1", bytes.NewBuffer(updateUser))
+	response = executeRequest(req)
+
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var updatedUser map[string]interface{}
+
+	json.Unmarshal(response.Body.Bytes(), &updatedUser)
+
+	if originalUser["id"] != updatedUser["id"] {
+		t.Errorf("ID doesnt same. original : %v. Got %v", originalUser["id"], updatedUser["id"])
+	}
+
+	if originalUser["title"] == updatedUser["title"] {
+		t.Errorf("title doesnt updated. Got : %v", updatedUser["title"])
+	}
+
+	if originalUser["description"] == updatedUser["description"] {
+		t.Errorf("decription doesnt updated. Got : %v", updatedUser["description"])
+	}
+
+	if originalUser["done"] == updatedUser["done"] {
+		t.Errorf("done doesnt updated. Got : %v", updatedUser["done"])
+	}
+}
+
+func TestDeleteTodoList(t *testing.T) {
+	clearTable()
+
+	addListItem(1)
+
+	req, _ := http.NewRequest("DELETE", "/todo/1", nil)
+	response := executeRequest(req)
 	checkResponseCode(t, http.StatusOK, response.Code)
 }
 
@@ -67,11 +143,11 @@ func executeRequest(r *http.Request) *httptest.ResponseRecorder {
 
 func checkResponseCode(t *testing.T, expected, actual int) {
 	if expected != actual {
-		t.Errorf("Expected response code %d. Got %d", expected, actual)
+		t.Errorf("Expected response code %d. Got %d.", expected, actual)
 	}
 }
 
-func addUser(count int) {
+func addListItem(count int) {
 	if count < 1 {
 		count = 1
 	}

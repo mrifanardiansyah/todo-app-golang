@@ -83,15 +83,65 @@ func (a *App) GetTodoListById(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) updateTodoList(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		responseWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
+	var li ListItem
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&li); err != nil {
+		responseWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	defer r.Body.Close()
+
+	li.ID = id
+
+	if err := li.UpdateList(a.DB); err != nil {
+		responseWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	responseWithJson(w, http.StatusOK, li)
 }
 
 func (a *App) addTodoList(w http.ResponseWriter, r *http.Request) {
+	var li ListItem
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&li); err != nil {
+		responseWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	defer r.Body.Close()
 
+	if err := li.AddList(a.DB); err != nil {
+		responseWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	responseWithJson(w, http.StatusOK, li)
 }
 
 func (a *App) deleteTodoList(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		responseWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
+	var li ListItem
+	li.ID = id
+
+	if err = li.DeleteList(a.DB); err != nil {
+		responseWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	responseWithJson(w, http.StatusOK, nil)
 }
 
 func responseWithError(w http.ResponseWriter, code int, message string) {

@@ -13,10 +13,10 @@ type ListItemPage struct {
 }
 
 type ListItem struct {
-	Title       string
-	Description string
-	ID          int
-	Done        bool
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	ID          int    `json:"id"`
+	Done        bool   `json:"done"`
 }
 
 func (li *ListItem) GetList(db *sql.DB) error {
@@ -25,11 +25,31 @@ func (li *ListItem) GetList(db *sql.DB) error {
 }
 
 func (li *ListItem) AddList(db *sql.DB) error {
-	return errors.New("error. belum ditambah")
+
+	if li.Title == "" || li.Description == "" {
+		return errors.New("Data tidak boleh kosong")
+	}
+
+	statement := fmt.Sprintf("INSERT INTO todolist (title, description, done) values ('%s', '%s', %t)", li.Title, li.Description, li.Done)
+	_, err := db.Exec(statement)
+
+	if err != nil {
+		return err
+	}
+
+	err = db.QueryRow("SELECT LAST_INSERT_ID()").Scan(&li.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (li *ListItem) UpdateList(db *sql.DB) error {
-	return errors.New("error. belum ditambah")
+	statement := fmt.Sprintf("UPDATE todolist set title='%s', description='%s', done=%t where id=%d",
+		li.Title, li.Description, li.Done, li.ID)
+	_, err := db.Exec(statement)
+	return err
 }
 
 func GetAllList(db *sql.DB) ([]ListItem, error) {
@@ -56,5 +76,10 @@ func GetAllList(db *sql.DB) ([]ListItem, error) {
 }
 
 func (li *ListItem) DeleteList(db *sql.DB) error {
-	return errors.New("error. belum ditambah")
+	statement := fmt.Sprintf("Delete from todolist where id=%d", li.ID)
+	_, err := db.Exec(statement)
+	if err != nil {
+		return err
+	}
+	return nil
 }
