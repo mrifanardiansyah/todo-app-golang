@@ -31,7 +31,7 @@ func TestMain(m *testing.M) {
 func TestEmptyTable(t *testing.T) {
 	clearTable()
 
-	req, _ := http.NewRequest("GET", "/todo", nil)
+	req, _ := http.NewRequest("GET", "/api/todo", nil)
 	response := executeRequest(req)
 
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -43,7 +43,7 @@ func TestGetAllTodoList(t *testing.T) {
 
 	addListItem(5)
 
-	req, _ := http.NewRequest("GET", "/todo", nil)
+	req, _ := http.NewRequest("GET", "/api/todo", nil)
 	response := executeRequest(req)
 
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -54,8 +54,13 @@ func TestGetTodoListById(t *testing.T) {
 
 	addListItem(1)
 
-	req, _ := http.NewRequest("GET", "/todo/1", nil)
+	req, _ := http.NewRequest("GET", "/api/todo/1", nil)
 	response := executeRequest(req)
+
+	fmt.Println(response.Body)
+
+	var s map[string]interface{}
+	json.Unmarshal(response.Body.Bytes(), &s)
 
 	checkResponseCode(t, http.StatusOK, response.Code)
 }
@@ -65,10 +70,26 @@ func TestAddTodoList(t *testing.T) {
 
 	todoListItem := []byte(`{"title": "blabla", "description": "bla bla bla", "done" : false}`)
 
-	req, _ := http.NewRequest("POST", "/todo", bytes.NewBuffer(todoListItem))
+	req, _ := http.NewRequest("POST", "/api/todo", bytes.NewBuffer(todoListItem))
 	response := executeRequest(req)
 
 	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var item map[string]interface{}
+
+	json.Unmarshal(response.Body.Bytes(), &item)
+
+	if item["title"] != "blabla" {
+		t.Errorf("failed added data title")
+	}
+
+	if item["description"] != "bla bla bla" {
+		t.Errorf("failed added data description")
+	}
+
+	if item["done"] != false {
+		t.Errorf("failed added data done")
+	}
 }
 
 func TestAddEmptyTodoList(t *testing.T) {
@@ -76,7 +97,7 @@ func TestAddEmptyTodoList(t *testing.T) {
 
 	todoListItem := []byte(`{"title": "", "description": "", "done" : }`)
 
-	req, _ := http.NewRequest("POST", "/todo", bytes.NewBuffer(todoListItem))
+	req, _ := http.NewRequest("POST", "/api/todo", bytes.NewBuffer(todoListItem))
 	response := executeRequest(req)
 
 	checkResponseCode(t, http.StatusBadRequest, response.Code)
@@ -87,18 +108,16 @@ func TestUpdateTodoList(t *testing.T) {
 
 	addListItem(1)
 
-	req, _ := http.NewRequest("GET", "/todo/1", nil)
+	req, _ := http.NewRequest("GET", "/api/todo/1", nil)
 	response := executeRequest(req)
 
 	var originalUser map[string]interface{}
 
 	json.Unmarshal(response.Body.Bytes(), &originalUser)
 
-	fmt.Println(originalUser["id"])
+	updateItem := []byte(`{"title": "muehehe", "description": "muehehe", "done": true}`)
 
-	updateUser := []byte(`{"title":"update", "description": "wkwk", "done": true}`)
-
-	req, _ = http.NewRequest("PUT", "/todo/1", bytes.NewBuffer(updateUser))
+	req, _ = http.NewRequest("PUT", "/api/todo/1", bytes.NewBuffer(updateItem))
 	response = executeRequest(req)
 
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -129,9 +148,14 @@ func TestDeleteTodoList(t *testing.T) {
 
 	addListItem(1)
 
-	req, _ := http.NewRequest("DELETE", "/todo/1", nil)
+	req, _ := http.NewRequest("DELETE", "/api/todo/1", nil)
 	response := executeRequest(req)
 	checkResponseCode(t, http.StatusOK, response.Code)
+
+	req, _ = http.NewRequest("GET", "/api/todo/1", nil)
+	response = executeRequest(req)
+
+	checkResponseCode(t, http.StatusInternalServerError, response.Code)
 }
 
 func executeRequest(r *http.Request) *httptest.ResponseRecorder {

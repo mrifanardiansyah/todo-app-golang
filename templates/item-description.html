@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <table>
+        <tr align="left">
+            <th>Title</th>
+            <th> : </th>
+            <td>{{.Title}}</td>
+        </tr>
+        <tr align="left">
+            <th>Description</th>
+            <th> : </th>
+            <td>{{.Description}}</td>
+        </tr>
+        <tr align="left">
+            <th>Status</th>
+            <th> : </th>
+            {{if .Done}}
+            <td>Selesai</td>
+            {{else}}
+            <td>Belum Selesai</td>
+            {{end}}
+        </tr>
+    </table>
+
+    <a href="/todo">back</a>
+</body>
+</html>

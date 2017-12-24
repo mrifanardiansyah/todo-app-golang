@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>List Item</title>
+</head>
+<body>
+    <h1>{{.Header}}</h1>
+    <form action="/todo" method="post">
+        <input type="text" id="title" placeholder="Title" name="title" value="{{.Title}}">
+        <br><br>
+        <textarea name="description" id="description" cols="30" rows="5" placeholder="Description">{{.Description}}</textarea>
+        <br>
+        <input type="submit">
+    </form>
+</body>
+</html>

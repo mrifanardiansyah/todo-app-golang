@@ -1,0 +1,35 @@
+#remove-item {
+    background: transparent;
+    background-image: url("/static/assets/rubbish-bin.png");
+    background-size: cover;
+    background-position: center;
+    border: none;
+    color: transparent;
+    width: 45px;
+    height: 65px;
+}
+
+#remove-item:hover {
+    background-image: url("/static/assets/rubbish-bin-hover.png");
+    cursor: pointer;
+}
+
+#edit-item {
+    background: transparent;
+    background-image: url("/static/assets/edit.png");
+    background-size: cover;
+    background-position: center;
+    border: none;
+    color: transparent;
+    width: 45px;
+    height: 65px;
+}
+
+#edit-item:hover {
+    background-image: url("/static/assets/edit-hover.png");
+    cursor: pointer;
+}
+
+.item:hover {
+    cursor: pointer;
+}

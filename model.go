@@ -83,3 +83,10 @@ func (li *ListItem) DeleteList(db *sql.DB) error {
 	}
 	return nil
 }
+
+func (li *ListItem) IsValid() (bool, error) {
+	if li.Description == "" || li.Title == "" {
+		return false, errors.New("Description or Title cant be empty")
+	}
+	return true, nil
+}

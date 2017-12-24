@@ -5,21 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <h1>{{.Header}}</h1>
-    <table style="width:50%">
-        <tr>
+    <table border="1" style="width:50%;">
+        <tr align="left">
             <th>Title</th>
             <th>Description</th>
+            <th></th>
         </tr>
         {{range .TodoList}}
-        <tr>
-            <td>{{.Title}}</td>
-            <td>{{.Description}}</td>
+        <tr id="item-{{.ID}}" class="item">
+            <td data-id="{{.ID}}" onclick="gotoDetail(this.getAttribute('data-id'))">{{.Title}}</td>
+            <td data-id="{{.ID}}" onclick="gotoDetail(this.getAttribute('data-id'))">{{.Description}}</td>
+            <td>
+                <div data-id="{{.ID}}" id="remove-item" alt="" onclick="deleteItem(this.getAttribute('data-id'))"></div>
+                <div data-id="{{.ID}}" id="edit-item" alt="" onclick="editItem(this.getAttribute('data-id'))">dafdf</div>
+            </td>
         </tr>
         {{end}}
     </table> 
-    <a href="./todo/new/">New Todo List</a>
+    <a href="/todo/new">New Todo List</a>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="/static/js/home.js"></script>
 </body>
 </html>
